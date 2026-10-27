@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>BOMB 💣</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💣</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d0c;
+    --panel: #1b1f1d;
+    --panel2: #252a27;
+    --edge: #3a403c;
+    --red: #ff2a2a;
+    --red-dim: #3a0b0b;
+    --green: #2aff6a;
+    --amber: #ffb02a;
+    --text: #d6ddd8;
+    --muted: #7d8780;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(ellipse at top, #1a1f1c 0%, var(--bg) 70%);
+    color: var(--text);
+    font-family: 'Share Tech Mono', ui-monospace, monospace;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px; min-height: 100%;
+    overflow-x: hidden;
+  }
+  h1 { margin: 8px 0 4px; letter-spacing: 6px; font-size: 28px; color: var(--red); text-shadow: 0 0 12px rgba(255,42,42,.6); }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 14px; text-align: center; }
+
+  .bomb {
+    width: 100%; max-width: 420px;
+    background: linear-gradient(160deg, var(--panel2), var(--panel));
+    border: 2px solid var(--edge); border-radius: 18px;
+    padding: 18px; position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .bomb::before, .bomb::after {
+    content: ""; position: absolute; top: 10px; width: 10px; height: 10px; border-radius: 50%;
+    background: #555; box-shadow: inset 0 0 2px #000;
+  }
+  .bomb::before { left: 10px; } .bomb::after { right: 10px; }
+  .wires { display: flex; justify-content: center; gap: 10px; margin: -6px 0 10px; }
+  .wires span { width: 50px; height: 6px; border-radius: 3px; }
+
+  .row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .led { width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .led.blink { animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: .15; } }
+
+  .timer {
+    background: #000; border: 2px solid #111; border-radius: 8px;
+    font-size: 64px; text-align: center; color: var(--red);
+    text-shadow: 0 0 14px rgba(255,42,42,.8); padding: 6px 0; letter-spacing: 4px;
+    position: relative;
+  }
+  .timer .ghost { position: absolute; inset: 6px 0; color: var(--red-dim); text-shadow: none; z-index: 0; }
+  .timer .val { position: relative; z-index: 1; }
+  .timer.urgent .val { animation: blink .5s steps(1) infinite; }
+
+  .code {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0;
+  }
+  .code div {
+    background: #000; border: 2px solid #111; border-radius: 8px; height: 64px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; color: var(--amber); text-shadow: 0 0 10px rgba(255,176,42,.7);
+  }
+  .code div.empty { color: #2a2410; text-shadow: none; }
+  .code.wrong div { color: var(--red); border-color: var(--red); animation: shake .3s; }
+  .code.right div { color: var(--green); border-color: var(--green); text-shadow: 0 0 10px var(--green); }
+  @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+  .pad { display: grid; gap: 8px; }
+  .pad.m4 { grid-template-columns: repeat(4, 1fr); }
+  .pad.m10 { grid-template-columns: repeat(3, 1fr); }
+  .pad button {
+    font-family: inherit; font-size: 26px; color: var(--text);
+    background: linear-gradient(#3a403c, #2a2f2c); border: 1px solid #111;
+    border-bottom: 4px solid #111; border-radius: 10px; padding: 14px 0; cursor: pointer;
+    touch-action: manipulation; user-select: none;
+  }
+  .pad button:active { transform: translateY(2px); border-bottom-width: 2px; }
+  .pad button.act { font-size: 16px; }
+  .pad button.ok { background: linear-gradient(#1f5a33, #164226); color: var(--green); }
+  .pad button.del { background: linear-gradient(#5a1f1f, #421616); color: #ff8a8a; }
+  .pad button:disabled { opacity: .4; cursor: default; }
+
+  .controls { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .controls button, .controls select {
+    flex: 1; font-family: inherit; font-size: 14px; padding: 10px; border-radius: 8px;
+    border: 1px solid var(--edge); background: #111; color: var(--text); cursor: pointer; min-width: 120px;
+  }
+  .controls button.primary { background: var(--red); color: #fff; border-color: var(--red); font-weight: bold; letter-spacing: 2px; }
+
+  .panel { width: 100%; max-width: 420px; margin-top: 16px; background: var(--panel); border: 1px solid var(--edge); border-radius: 12px; padding: 12px; }
+  .panel h2 { font-size: 14px; margin: 0 0 8px; color: var(--muted); letter-spacing: 2px; display: flex; justify-content: space-between; }
+  .log { display: flex; flex-wrap: wrap; gap: 4px; max-height: 120px; overflow-y: auto; }
+  .log span { background: #000; color: var(--red); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  .log span.win { color: var(--green); }
+  .grid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; }
+  .grid div { font-size: 8px; text-align: center; padding: 3px 0; background: #000; color: #444; border-radius: 2px; }
+  .grid div.tried { background: var(--red-dim); color: var(--red); }
+  .grid div.win { background: var(--green); color: #000; }
+  .bar { height: 6px; background: #000; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--amber); transition: width .2s; }
+  .tip { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* overlays */
+  .overlay {
+    position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 50; text-align: center; padding: 16px;
+  }
+  .overlay.show { display: flex; }
+  #boom { background: radial-gradient(circle, #fff 0%, #ffcc00 15%, #ff4400 40%, #300 75%, #000 100%); animation: boom 1.2s ease-out forwards; }
+  @keyframes boom { 0% { transform: scale(.1); opacity: 0; } 15% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(1); } }
+  #boom h2 { font-size: 72px; margin: 0; color: #fff; text-shadow: 0 0 30px #f00, 0 0 60px #f80; }
+  #win { background: rgba(0, 20, 8, .96); }
+  #win h2 { font-size: 40px; margin: 0; color: var(--green); text-shadow: 0 0 20px var(--green); }
+  .overlay p { font-size: 18px; color: #fff; max-width: 360px; }
+  .overlay button { margin-top: 18px; font-family: inherit; font-size: 18px; padding: 12px 24px; border-radius: 10px; border: 0; cursor: pointer; background: #fff; color: #000; }
+  body.shake { animation: bigshake .6s; }
+  @keyframes bigshake { 10%,50%,90% { transform: translate(-10px, 6px); } 30%,70% { transform: translate(10px, -6px); } }
+</style>
+</head>
+<body>
+  <h1>💣 BOMB</h1>
+  <div class="sub">Descubra o código de 4 dígitos antes que exploda.<br>Tentativas ilimitadas. Boa sorte, amor ❤️</div>
+
+  <div class="bomb">
+    <div class="wires"><span style="background:#d22"></span><span style="background:#22d"></span><span style="background:#dd2"></span><span style="background:#2a2"></span></div>
+    <div class="row"><span><i class="led" id="led"></i><span id="status">PRONTA</span></span><span id="modeLabel">DÍGITOS 1-4</span></div>
+    <div class="timer" id="timer"><span class="val" id="time">05:00</span></div>
+    <div class="code" id="code"><div class="empty">-</div><div class="empty">-</div><div class="empty">-</div><div class="empty">-</div></div>
+    <div class="pad" id="pad"></div>
+    <div class="controls">
+      <select id="mode" aria-label="Modo">
+        <option value="4">Fácil: dígitos 1-4 (256)</option>
+        <option value="10">Difícil: dígitos 0-9 (10.000)</option>
+      </select>
+      <button class="primary" id="start">ARMAR</button>
+    </div>
+    <div class="controls">
+      <button id="robot">🤖 Ver o robô tentar 1111 → 4444</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2><span>TENTATIVAS</span><span id="count">0</span></h2>
+    <div class="log" id="log"></div>
+    <div class="bar"><i id="progress"></i></div>
+  </div>
+
+  <div class="panel" id="gridPanel">
+    <h2><span>TABELA (1111 → 4444)</span><span id="left">256 restantes</span></h2>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="tip">
+      <b>Dica do Gustavo:</b> não chuta aleatório. Vai em ordem — 1111, 1112, 1113, 1114, 1121... — e não perde a conta.
+      No modo 1-4 são só 256 códigos: dá ~1,1 segundo por tentativa em 5 minutos. Dá tempo! 😏<br>
+      Teclado também funciona: digite os números e aperte <b>Enter</b>.
+    </div>
+  </div>
+
+  <div class="overlay" id="boom">
+    <h2>💥 BOOM 💥</h2>
+    <p id="boomMsg"></p>
+    <button onclick="reset()">Tentar de novo</button>
+  </div>
+  <div class="overlay" id="win">
+    <h2>✅ BOMBA DESARMADA</h2>
+    <p id="winMsg"></p>
+    <button onclick="reset()">Jogar de novo</button>
+  </div>
+
+<script>
+const TOTAL = 5 * 60;
+let base = 4, secret = '', input = '', tried = [], state = 'idle', endAt = 0, tick = null, robot = null;
+const $ = id => document.getElementById(id);
+
+function digits() { return base === 4 ? ['1','2','3','4'] : ['1','2','3','4','5','6','7','8','9','0']; }
+function randomCode() {
+  const d = digits(), a = new Uint32Array(4);
+  crypto.getRandomValues(a);
+  return Array.from(a, n => d[n % d.length]).join('');
+}
+
+function buildPad() {
+  const pad = $('pad');
+  pad.className = 'pad ' + (base === 4 ? 'm4' : 'm10');
+  pad.innerHTML = '';
+  const keys = base === 4 ? ['1','2','3','4','DEL','OK'] : ['1','2','3','4','5','6','7','8','9','DEL','0','OK'];
+  for (const k of keys) {
+    const b = document.createElement('button');
+    b.textContent = k === 'DEL' ? '⌫' : k === 'OK' ? 'OK' : k;
+    if (k === 'DEL') b.className = 'act del';
+    if (k === 'OK') b.className = 'act ok';
+    if (base === 4 && (k === 'DEL' || k === 'OK')) b.style.gridColumn = 'span 2';
+    b.onclick = () => press(k);
+    pad.appendChild(b);
+  }
+}
+
+function buildGrid() {
+  const g = $('grid'); g.innerHTML = '';
+  $('gridPanel').style.display = base === 4 ? '' : 'none';
+  if (base !== 4) return;
+  for (let i = 0; i < 256; i++) {
+    const c = [3,2,1,0].map(p => (Math.floor(i / 4 ** p) % 4) + 1).join('');
+    const el = document.createElement('div');
+    el.textContent = c; el.id = 'g' + c;
+    g.appendChild(el);
+  }
+}
+
+function renderCode(cls) {
+  const box = $('code');
+  box.className = 'code' + (cls ? ' ' + cls : '');
+  [...box.children].forEach((el, i) => {
+    el.textContent = input[i] || '-';
+    el.classList.toggle('empty', !input[i]);
+  });
+}
+
+function fmt(s) { return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
+
+function updateTimer() {
+  const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+  $('time').textContent = fmt(left);
+  $('timer').classList.toggle('urgent', left <= 30);
+  if (left <= 0) explode();
+}
+
+function start() {
+  if (state === 'armed') return;
+  secret = randomCode();
+  input = ''; tried = []; state = 'armed';
+  endAt = Date.now() + TOTAL * 1000;
+  $('log').innerHTML = ''; $('count').textContent = '0';
+  buildGrid(); refreshStats(); renderCode();
+  $('status').textContent = 'ARMADA';
+  $('led').classList.add('blink');
+  $('start').textContent = 'ARMADA...';
+  $('start').disabled = true; $('mode').disabled = true;
+  clearInterval(tick); tick = setInterval(updateTimer, 200); updateTimer();
+}
+
+function press(k) {
+  if (state === 'idle') start();
+  if (state !== 'armed') return;
+  if (k === 'DEL') { input = input.slice(0, -1); renderCode(); return; }
+  if (k === 'OK') { if (input.length === 4) submit(); return; }
+  if (input.length < 4) { input += k; renderCode(); }
+  if (input.length === 4 && !robot) setTimeout(() => state === 'armed' && input.length === 4 && submit(), 120);
+}
+
+function submit() {
+  const guess = input;
+  tried.push(guess);
+  const span = document.createElement('span');
+  span.textContent = guess;
+  $('log').prepend(span);
+  $('count').textContent = tried.length;
+  const cell = $('g' + guess);
+  if (guess === secret) {
+    span.className = 'win'; if (cell) cell.className = 'win';
+    renderCode('right'); refreshStats(); defuse(); return;
+  }
+  if (cell) cell.className = 'tried';
+  refreshStats();
+  renderCode('wrong');
+  if (navigator.vibrate) navigator.vibrate(60);
+  setTimeout(() => { input = ''; if (state === 'armed') renderCode(); }, 250);
+}
+
+function refreshStats() {
+  const space = base ** 4;
+  const uniq = new Set(tried).size;
+  $('left').textContent = (256 - uniq) + ' restantes';
+  $('progress').style.width = (uniq / space * 100) + '%';
+}
+
+function stopAll() {
+  clearInterval(tick); clearInterval(robot); robot = null;
+  $('led').classList.remove('blink');
+}
+
+function defuse() {
+  const byRobot = robot !== null;
+  state = 'won'; stopAll();
+  const used = TOTAL - Math.ceil((endAt - Date.now()) / 1000);
+  $('status').textContent = 'DESARMADA';
+  $('winMsg').innerHTML = `O código era <b>${secret}</b>.<br>${tried.length} tentativa(s) em ${fmt(used)}.<br>${byRobot ? 'Viu? Indo em ordem dá tempo 😏' : 'Arrasou! 🥳'}`;
+  setTimeout(() => $('win').classList.add('show'), 600);
+}
+
+function explode() {
+  if (state !== 'armed') return;
+  state = 'boom'; stopAll();
+  $('status').textContent = 'BOOM';
+  $('boomMsg').innerHTML = `O código era <b>${secret}</b>.<br>Você fez ${tried.length} tentativa(s).`;
+  document.body.classList.add('shake');
+  $('boom').classList.add('show');
+  if (navigator.vibrate) navigator.vibrate([300, 100, 500]);
+}
+
+function reset() {
+  stopAll(); state = 'idle'; input = ''; tried = [];
+  document.body.classList.remove('shake');
+  $('boom').classList.remove('show'); $('win').classList.remove('show');
+  $('time').textContent = fmt(TOTAL); $('timer').classList.remove('urgent');
+  $('status').textContent = 'PRONTA';
+  $('start').textContent = 'ARMAR'; $('start').disabled = false; $('mode').disabled = false;
+  $('log').innerHTML = ''; $('count').textContent = '0';
+  buildGrid(); refreshStats(); renderCode();
+}
+
+function runRobot() {
+  if (base !== 4) { $('mode').value = '4'; setMode(); }
+  if (state !== 'idle') reset();
+  start();
+  let i = 0;
+  // ~1 code per second, like a person typing in order
+  robot = setInterval(() => {
+    if (state !== 'armed') return;
+    input = [3,2,1,0].map(p => (Math.floor(i / 4 ** p) % 4) + 1).join('');
+    renderCode(); submit(); i++;
+  }, 1000);
+}
+
+function setMode() {
+  base = Number($('mode').value);
+  $('modeLabel').textContent = base === 4 ? 'DÍGITOS 1-4' : 'DÍGITOS 0-9';
+  buildPad(); reset();
+}
+
+$('mode').onchange = setMode;
+$('start').onclick = start;
+$('robot').onclick = runRobot;
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') return press('OK');
+  if (e.key === 'Backspace') return press('DEL');
+  if (digits().includes(e.key)) press(e.key);
+});
+
+buildPad(); buildGrid(); refreshStats();
+</script>
+</body>
+</html>
