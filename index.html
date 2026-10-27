@@ -2,354 +2,171 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<title>BOMB 💣</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💣</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0b0d0c;
-    --panel: #1b1f1d;
-    --panel2: #252a27;
-    --edge: #3a403c;
-    --red: #ff2a2a;
-    --red-dim: #3a0b0b;
-    --green: #2aff6a;
-    --amber: #ffb02a;
-    --text: #d6ddd8;
-    --muted: #7d8780;
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; height: 100%; }
-  body {
-    background: radial-gradient(ellipse at top, #1a1f1c 0%, var(--bg) 70%);
-    color: var(--text);
-    font-family: 'Share Tech Mono', ui-monospace, monospace;
-    display: flex; flex-direction: column; align-items: center;
-    padding: 16px; min-height: 100%;
-    overflow-x: hidden;
-  }
-  h1 { margin: 8px 0 4px; letter-spacing: 6px; font-size: 28px; color: var(--red); text-shadow: 0 0 12px rgba(255,42,42,.6); }
-  .sub { color: var(--muted); font-size: 13px; margin-bottom: 14px; text-align: center; }
-
-  .bomb {
-    width: 100%; max-width: 420px;
-    background: linear-gradient(160deg, var(--panel2), var(--panel));
-    border: 2px solid var(--edge); border-radius: 18px;
-    padding: 18px; position: relative;
-    box-shadow: 0 20px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
-  }
-  .bomb::before, .bomb::after {
-    content: ""; position: absolute; top: 10px; width: 10px; height: 10px; border-radius: 50%;
-    background: #555; box-shadow: inset 0 0 2px #000;
-  }
-  .bomb::before { left: 10px; } .bomb::after { right: 10px; }
-  .wires { display: flex; justify-content: center; gap: 10px; margin: -6px 0 10px; }
-  .wires span { width: 50px; height: 6px; border-radius: 3px; }
-
-  .row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-  .led { width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); display: inline-block; vertical-align: middle; margin-right: 6px; }
-  .led.blink { animation: blink 1s steps(1) infinite; }
-  @keyframes blink { 50% { opacity: .15; } }
-
-  .timer {
-    background: #000; border: 2px solid #111; border-radius: 8px;
-    font-size: 64px; text-align: center; color: var(--red);
-    text-shadow: 0 0 14px rgba(255,42,42,.8); padding: 6px 0; letter-spacing: 4px;
-    position: relative;
-  }
-  .timer .ghost { position: absolute; inset: 6px 0; color: var(--red-dim); text-shadow: none; z-index: 0; }
-  .timer .val { position: relative; z-index: 1; }
-  .timer.urgent .val { animation: blink .5s steps(1) infinite; }
-
-  .code {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0;
-  }
-  .code div {
-    background: #000; border: 2px solid #111; border-radius: 8px; height: 64px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 40px; color: var(--amber); text-shadow: 0 0 10px rgba(255,176,42,.7);
-  }
-  .code div.empty { color: #2a2410; text-shadow: none; }
-  .code.wrong div { color: var(--red); border-color: var(--red); animation: shake .3s; }
-  .code.right div { color: var(--green); border-color: var(--green); text-shadow: 0 0 10px var(--green); }
-  @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-
-  .pad { display: grid; gap: 8px; }
-  .pad.m4 { grid-template-columns: repeat(4, 1fr); }
-  .pad.m10 { grid-template-columns: repeat(3, 1fr); }
-  .pad button {
-    font-family: inherit; font-size: 26px; color: var(--text);
-    background: linear-gradient(#3a403c, #2a2f2c); border: 1px solid #111;
-    border-bottom: 4px solid #111; border-radius: 10px; padding: 14px 0; cursor: pointer;
-    touch-action: manipulation; user-select: none;
-  }
-  .pad button:active { transform: translateY(2px); border-bottom-width: 2px; }
-  .pad button.act { font-size: 16px; }
-  .pad button.ok { background: linear-gradient(#1f5a33, #164226); color: var(--green); }
-  .pad button.del { background: linear-gradient(#5a1f1f, #421616); color: #ff8a8a; }
-  .pad button:disabled { opacity: .4; cursor: default; }
-
-  .controls { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-  .controls button, .controls select {
-    flex: 1; font-family: inherit; font-size: 14px; padding: 10px; border-radius: 8px;
-    border: 1px solid var(--edge); background: #111; color: var(--text); cursor: pointer; min-width: 120px;
-  }
-  .controls button.primary { background: var(--red); color: #fff; border-color: var(--red); font-weight: bold; letter-spacing: 2px; }
-
-  .panel { width: 100%; max-width: 420px; margin-top: 16px; background: var(--panel); border: 1px solid var(--edge); border-radius: 12px; padding: 12px; }
-  .panel h2 { font-size: 14px; margin: 0 0 8px; color: var(--muted); letter-spacing: 2px; display: flex; justify-content: space-between; }
-  .log { display: flex; flex-wrap: wrap; gap: 4px; max-height: 120px; overflow-y: auto; }
-  .log span { background: #000; color: var(--red); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
-  .log span.win { color: var(--green); }
-  .grid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; }
-  .grid div { font-size: 8px; text-align: center; padding: 3px 0; background: #000; color: #444; border-radius: 2px; }
-  .grid div.tried { background: var(--red-dim); color: var(--red); }
-  .grid div.win { background: var(--green); color: #000; }
-  .bar { height: 6px; background: #000; border-radius: 3px; overflow: hidden; margin-top: 8px; }
-  .bar i { display: block; height: 100%; width: 0; background: var(--amber); transition: width .2s; }
-  .tip { font-size: 12px; color: var(--muted); line-height: 1.5; }
-
-  /* overlays */
-  .overlay {
-    position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 50; text-align: center; padding: 16px;
-  }
-  .overlay.show { display: flex; }
-  #boom { background: radial-gradient(circle, #fff 0%, #ffcc00 15%, #ff4400 40%, #300 75%, #000 100%); animation: boom 1.2s ease-out forwards; }
-  @keyframes boom { 0% { transform: scale(.1); opacity: 0; } 15% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(1); } }
-  #boom h2 { font-size: 72px; margin: 0; color: #fff; text-shadow: 0 0 30px #f00, 0 0 60px #f80; }
-  #win { background: rgba(0, 20, 8, .96); }
-  #win h2 { font-size: 40px; margin: 0; color: var(--green); text-shadow: 0 0 20px var(--green); }
-  .overlay p { font-size: 18px; color: #fff; max-width: 360px; }
-  .overlay button { margin-top: 18px; font-family: inherit; font-size: 18px; padding: 12px 24px; border-radius: 10px; border: 0; cursor: pointer; background: #fff; color: #000; }
-  body.shake { animation: bigshake .6s; }
-  @keyframes bigshake { 10%,50%,90% { transform: translate(-10px, 6px); } 30%,70% { transform: translate(10px, -6px); } }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#24221e">
+<meta name="description" content="Descubra o código de 4 dígitos antes que a bomba exploda. Você tem 1 minuto.">
+<meta property="og:title" content="💣 BOMBA — você tem 1 minuto">
+<meta property="og:description" content="Descubra o código de 4 dígitos antes que exploda. Tentativas ilimitadas.">
+<title>💣 BOMBA · 1 minuto</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%A3%3C/text%3E%3C/svg%3E">
+<link rel="preload" href="assets/fonts/DSEG7Classic-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/DSEG14Classic-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/rajdhani-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/caveat-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <h1>💣 BOMB</h1>
-  <div class="sub">Descubra o código de 4 dígitos antes que exploda.<br>Tentativas ilimitadas. Boa sorte, amor ❤️</div>
-
-  <div class="bomb">
-    <div class="wires"><span style="background:#d22"></span><span style="background:#22d"></span><span style="background:#dd2"></span><span style="background:#2a2"></span></div>
-    <div class="row"><span><i class="led" id="led"></i><span id="status">PRONTA</span></span><span id="modeLabel">DÍGITOS 1-4</span></div>
-    <div class="timer" id="timer"><span class="val" id="time">05:00</span></div>
-    <div class="code" id="code"><div class="empty">-</div><div class="empty">-</div><div class="empty">-</div><div class="empty">-</div></div>
-    <div class="pad" id="pad"></div>
-    <div class="controls">
-      <select id="mode" aria-label="Modo">
-        <option value="4">Fácil: dígitos 1-4 (256)</option>
-        <option value="10">Difícil: dígitos 0-9 (10.000)</option>
-      </select>
-      <button class="primary" id="start">ARMAR</button>
+<div id="app" class="P idle">
+  <div id="scene">
+    <div id="floor" aria-hidden="true">
+      <div class="seam s1"></div><div class="seam s2"></div>
+      <div class="stain st1"></div><div class="stain st2"></div><div class="stain st3"></div>
+      <div class="spray">A</div>
+      <i class="shell sh1"></i><i class="shell sh2"></i><i class="shell sh3"></i><i class="shell sh4"></i>
     </div>
-    <div class="controls">
-      <button id="robot">🤖 Ver o robô tentar 1111 → 4444</button>
+    <canvas id="after" aria-hidden="true"></canvas>
+
+    <div id="hud">
+      <button class="hb" id="robotBtn" type="button" data-k="ROBOT" aria-label="Robô: tenta todos os códigos em ordem, de 1111 a 4444"><span class="e" aria-hidden="true">🤖</span><span>robô</span></button>
+      <div class="hud-mid" id="hudMid"><b>FÁCIL · 1 a 4</b>256 combinações · 1 minuto</div>
+      <button class="hb sq" id="muteBtn" type="button" data-k="MUTE" aria-label="Desligar o som" aria-pressed="false"><span class="e" id="muteIco" aria-hidden="true">🔊</span></button>
+    </div>
+
+    <div id="stageWrap">
+      <div id="stage">
+        <div id="c4" aria-hidden="true">
+          <div class="blk b4"></div><div class="blk b3"></div><div class="blk b2"></div>
+          <div class="blk b1"><div class="stencil">CARGA DE DEMOLIÇÃO M112<span class="big">C-4</span>EXPLOSIVO PLÁSTICO · 0,57 kg<br>LOTE 7355608</div></div>
+          <div class="band v1"></div><div class="band v2"></div>
+          <div class="cap c1"><i class="hole"></i></div><div class="cap c2"><i class="hole"></i></div>
+        </div>
+        <div class="dtape d1"></div><div class="dtape d2"></div><div class="dtape d3"></div><div class="dtape d4"></div>
+        <div id="device">
+          <div class="dv-wear"></div>
+          <i class="screw k1" style="--r:24deg"></i><i class="screw k2" style="--r:-12deg"></i><i class="screw k3" style="--r:61deg"></i><i class="screw k4" style="--r:5deg"></i>
+          <div class="dv">
+            <div class="a-head">
+              <div class="leds">
+                <div class="ledrow"><span class="led red" id="ledArm"></span><span class="pr">ARMADA</span></div>
+                <div class="ledrow"><span class="led green" id="ledSafe"></span><span class="pr">SEGURA</span></div>
+              </div>
+              <button class="modesw" id="modeSw" type="button" data-k="MODE" aria-label="Dificuldade: Fácil, dígitos 1 a 4. Toque para trocar.">
+                <span class="pr">MODO</span>
+                <span class="ms-row"><span class="pr ms-a">1–4</span><span class="ms-track"><span class="ms-knob"></span></span><span class="pr ms-b">0–9</span></span>
+              </button>
+              <div class="grille" aria-hidden="true"></div>
+            </div>
+            <div class="a-timer">
+              <i class="spill"></i>
+              <div class="tw" id="tw" role="timer" aria-label="Tempo restante">
+                <span class="tlbl">TEMPO</span>
+                <span class="d7 ghost" aria-hidden="true">88.:88</span>
+                <span class="d7 lit" id="tLit">01:00</span>
+                <i class="glass"></i>
+              </div>
+            </div>
+            <div class="a-arm">
+              <button class="armsw" id="armSw" type="button" data-k="ARM" aria-label="Armar a bomba: levanta a tampa vermelha e liga a chave">
+                <span class="as-plate"><span class="as-txt on">LIG</span><span class="as-txt off">DESL</span><i class="as-sc a"></i><i class="as-sc b"></i></span>
+                <span class="as-nut"></span>
+                <span class="as-lever"><span class="as-shaft"></span><span class="as-tip"></span></span>
+                <span class="as-cover"><span class="as-front"><span class="as-lbl">ARMAR</span></span><span class="as-back"></span></span>
+                <span class="halo"></span>
+              </button>
+            </div>
+            <div class="a-lcd">
+              <div class="lcdwin" id="lcdWin">
+                <div class="lcd" id="lcd">
+                  <div class="l-stat">
+                    <div class="lrow"><span class="d14 g">~~~~~~~~~</span><span class="d14 t" id="lA"></span></div>
+                    <div class="lrow"><span class="d14 g">~~~~~~~~~</span><span class="d14 t" id="lB"></span></div>
+                  </div>
+                  <div class="l-sep"></div>
+                  <div class="l-code" id="lCode">
+                    <span class="c"><span class="d14 g">~</span><span class="d14 t">-</span></span><span class="c"><span class="d14 g">~</span><span class="d14 t">-</span></span><span class="c"><span class="d14 g">~</span><span class="d14 t">-</span></span><span class="c"><span class="d14 g">~</span><span class="d14 t">-</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="a-keys"><div class="keypad" id="keypad"></div></div>
+            <div class="a-label" aria-hidden="true">
+              <div class="sticker"><div class="hz"></div><div class="tx"><b>PERIGO · EXPLOSIVO</b><i>DETONADOR DIGITAL DT-60 · 9 V</i><i>NÃO VIOLAR · NÃO MOLHAR</i></div><div class="bar"></div></div>
+            </div>
+          </div>
+        </div>
+        <svg id="wires" aria-hidden="true"></svg>
+      </div>
+    </div>
+
+    <div id="npBack"></div>
+    <aside id="notes" aria-label="Caderninho de tentativas">
+      <div class="np" id="np">
+        <div class="np-spiral"></div>
+        <div class="np-top">
+          <span class="np-title">Caderninho</span>
+          <span class="np-meta" id="npMeta"></span>
+          <span class="np-hint" id="npHint">abrir ▲</span>
+          <button class="np-x" id="npClose" type="button" data-k="NOTESX" aria-label="Fechar o caderninho">✕</button>
+        </div>
+        <div class="np-scroll" id="npScroll">
+          <div class="np-intro" id="npIntro">
+            Você tem <b>1 minuto</b> pra achar o código de 4 dígitos.
+            Digita no teclado da bomba — o 4º dígito já confere.
+            Tentativas ilimitadas. Boa sorte, amor ❤️
+          </div>
+          <div class="np-empty" id="npEmpty" hidden>as tentativas aparecem aqui ✍</div>
+          <div class="np-log" id="npLog" aria-live="polite"></div>
+          <div class="np-sec" id="npTableSec">
+            <div class="np-h">Tabela pra não se perder <small>(1111 → 4444)</small></div>
+            <div class="np-table" id="npTable"></div>
+          </div>
+          <div class="np-sec" id="npHardSec">
+            <div class="np-hard">No difícil são <b>10.000</b> combinações (0000 → 9999)… aqui nem tabela salva 😅</div>
+          </div>
+          <div class="np-sec">
+            <div class="np-tip"><b>Dica do Gustavo:</b> não chuta aleatório. Vai em ordem — 1111, 1112, 1113, 1114, 1121… — e não perde a conta.
+              No Fácil são só 256 códigos, mas em 1 minuto isso dá ~4 por segundo. Na mão ninguém consegue… só o robô 🤖😏</div>
+          </div>
+        </div>
+        <button class="np-open" id="npOpen" type="button" data-k="NOTES" aria-label="Abrir o caderninho"></button>
+      </div>
+      <i class="pencil"></i>
+    </aside>
+
+    <canvas id="fx" aria-hidden="true"></canvas>
+    <canvas id="fxs" aria-hidden="true"></canvas>
+  </div>
+
+  <div id="glow" aria-hidden="true"></div>
+  <div id="flash" aria-hidden="true"></div>
+
+  <div id="end" hidden role="dialog" aria-modal="true" aria-labelledby="endTitle">
+    <div class="end-bg"></div>
+    <canvas id="conf" aria-hidden="true"></canvas>
+    <div class="card" id="endCard">
+      <div class="clip"></div>
+      <div class="c-left">
+        <div class="c-head"><span>RELATÓRIO DA MISSÃO</span><span id="endNo">Nº 001</span></div>
+        <h2 class="c-title" id="endTitle">BOMBA DESARMADA</h2>
+        <div class="c-sub" id="endSub">Os contra-terroristas venceram</div>
+        <p class="c-fun c-fx" id="endFun" style="--d:.7s"></p>
+        <p class="c-tip c-fx" id="endTip" style="--d:.85s"></p>
+      </div>
+      <div class="c-right">
+        <dl class="c-stats c-fx" id="endStats" style="--d:.45s"></dl>
+        <div class="c-actions c-fx" style="--d:.7s">
+          <button class="btn-big" id="replayBtn" type="button" data-k="REPLAY">Jogar de novo</button>
+          <div class="c-row2">
+            <button class="btn-sm" id="endMode" type="button" data-k="EMODE">Trocar p/ Difícil<small>dígitos 0–9</small></button>
+            <button class="btn-sm" id="endRobot" type="button" data-k="EROBOT">🤖 Ver o robô<small>1111 → 4444</small></button>
+          </div>
+        </div>
+      </div>
+      <div class="stamp" id="endStamp">DESARMADA</div>
     </div>
   </div>
-
-  <div class="panel">
-    <h2><span>TENTATIVAS</span><span id="count">0</span></h2>
-    <div class="log" id="log"></div>
-    <div class="bar"><i id="progress"></i></div>
-  </div>
-
-  <div class="panel" id="gridPanel">
-    <h2><span>TABELA (1111 → 4444)</span><span id="left">256 restantes</span></h2>
-    <div class="grid" id="grid"></div>
-  </div>
-
-  <div class="panel">
-    <div class="tip">
-      <b>Dica do Gustavo:</b> não chuta aleatório. Vai em ordem — 1111, 1112, 1113, 1114, 1121... — e não perde a conta.
-      No modo 1-4 são só 256 códigos: dá ~1,1 segundo por tentativa em 5 minutos. Dá tempo! 😏<br>
-      Teclado também funciona: digite os números e aperte <b>Enter</b>.
-    </div>
-  </div>
-
-  <div class="overlay" id="boom">
-    <h2>💥 BOOM 💥</h2>
-    <p id="boomMsg"></p>
-    <button onclick="reset()">Tentar de novo</button>
-  </div>
-  <div class="overlay" id="win">
-    <h2>✅ BOMBA DESARMADA</h2>
-    <p id="winMsg"></p>
-    <button onclick="reset()">Jogar de novo</button>
-  </div>
-
-<script>
-const TOTAL = 5 * 60;
-let base = 4, secret = '', input = '', tried = [], state = 'idle', endAt = 0, tick = null, robot = null;
-const $ = id => document.getElementById(id);
-
-function digits() { return base === 4 ? ['1','2','3','4'] : ['1','2','3','4','5','6','7','8','9','0']; }
-function randomCode() {
-  const d = digits(), a = new Uint32Array(4);
-  crypto.getRandomValues(a);
-  return Array.from(a, n => d[n % d.length]).join('');
-}
-
-function buildPad() {
-  const pad = $('pad');
-  pad.className = 'pad ' + (base === 4 ? 'm4' : 'm10');
-  pad.innerHTML = '';
-  const keys = base === 4 ? ['1','2','3','4','DEL','OK'] : ['1','2','3','4','5','6','7','8','9','DEL','0','OK'];
-  for (const k of keys) {
-    const b = document.createElement('button');
-    b.textContent = k === 'DEL' ? '⌫' : k === 'OK' ? 'OK' : k;
-    if (k === 'DEL') b.className = 'act del';
-    if (k === 'OK') b.className = 'act ok';
-    if (base === 4 && (k === 'DEL' || k === 'OK')) b.style.gridColumn = 'span 2';
-    b.onclick = () => press(k);
-    pad.appendChild(b);
-  }
-}
-
-function buildGrid() {
-  const g = $('grid'); g.innerHTML = '';
-  $('gridPanel').style.display = base === 4 ? '' : 'none';
-  if (base !== 4) return;
-  for (let i = 0; i < 256; i++) {
-    const c = [3,2,1,0].map(p => (Math.floor(i / 4 ** p) % 4) + 1).join('');
-    const el = document.createElement('div');
-    el.textContent = c; el.id = 'g' + c;
-    g.appendChild(el);
-  }
-}
-
-function renderCode(cls) {
-  const box = $('code');
-  box.className = 'code' + (cls ? ' ' + cls : '');
-  [...box.children].forEach((el, i) => {
-    el.textContent = input[i] || '-';
-    el.classList.toggle('empty', !input[i]);
-  });
-}
-
-function fmt(s) { return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
-
-function updateTimer() {
-  const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
-  $('time').textContent = fmt(left);
-  $('timer').classList.toggle('urgent', left <= 30);
-  if (left <= 0) explode();
-}
-
-function start() {
-  if (state === 'armed') return;
-  secret = randomCode();
-  input = ''; tried = []; state = 'armed';
-  endAt = Date.now() + TOTAL * 1000;
-  $('log').innerHTML = ''; $('count').textContent = '0';
-  buildGrid(); refreshStats(); renderCode();
-  $('status').textContent = 'ARMADA';
-  $('led').classList.add('blink');
-  $('start').textContent = 'ARMADA...';
-  $('start').disabled = true; $('mode').disabled = true;
-  clearInterval(tick); tick = setInterval(updateTimer, 200); updateTimer();
-}
-
-function press(k) {
-  if (state === 'idle') start();
-  if (state !== 'armed') return;
-  if (k === 'DEL') { input = input.slice(0, -1); renderCode(); return; }
-  if (k === 'OK') { if (input.length === 4) submit(); return; }
-  if (input.length < 4) { input += k; renderCode(); }
-  if (input.length === 4 && !robot) setTimeout(() => state === 'armed' && input.length === 4 && submit(), 120);
-}
-
-function submit() {
-  const guess = input;
-  tried.push(guess);
-  const span = document.createElement('span');
-  span.textContent = guess;
-  $('log').prepend(span);
-  $('count').textContent = tried.length;
-  const cell = $('g' + guess);
-  if (guess === secret) {
-    span.className = 'win'; if (cell) cell.className = 'win';
-    renderCode('right'); refreshStats(); defuse(); return;
-  }
-  if (cell) cell.className = 'tried';
-  refreshStats();
-  renderCode('wrong');
-  if (navigator.vibrate) navigator.vibrate(60);
-  setTimeout(() => { input = ''; if (state === 'armed') renderCode(); }, 250);
-}
-
-function refreshStats() {
-  const space = base ** 4;
-  const uniq = new Set(tried).size;
-  $('left').textContent = (256 - uniq) + ' restantes';
-  $('progress').style.width = (uniq / space * 100) + '%';
-}
-
-function stopAll() {
-  clearInterval(tick); clearInterval(robot); robot = null;
-  $('led').classList.remove('blink');
-}
-
-function defuse() {
-  const byRobot = robot !== null;
-  state = 'won'; stopAll();
-  const used = TOTAL - Math.ceil((endAt - Date.now()) / 1000);
-  $('status').textContent = 'DESARMADA';
-  $('winMsg').innerHTML = `O código era <b>${secret}</b>.<br>${tried.length} tentativa(s) em ${fmt(used)}.<br>${byRobot ? 'Viu? Indo em ordem dá tempo 😏' : 'Arrasou! 🥳'}`;
-  setTimeout(() => $('win').classList.add('show'), 600);
-}
-
-function explode() {
-  if (state !== 'armed') return;
-  state = 'boom'; stopAll();
-  $('status').textContent = 'BOOM';
-  $('boomMsg').innerHTML = `O código era <b>${secret}</b>.<br>Você fez ${tried.length} tentativa(s).`;
-  document.body.classList.add('shake');
-  $('boom').classList.add('show');
-  if (navigator.vibrate) navigator.vibrate([300, 100, 500]);
-}
-
-function reset() {
-  stopAll(); state = 'idle'; input = ''; tried = [];
-  document.body.classList.remove('shake');
-  $('boom').classList.remove('show'); $('win').classList.remove('show');
-  $('time').textContent = fmt(TOTAL); $('timer').classList.remove('urgent');
-  $('status').textContent = 'PRONTA';
-  $('start').textContent = 'ARMAR'; $('start').disabled = false; $('mode').disabled = false;
-  $('log').innerHTML = ''; $('count').textContent = '0';
-  buildGrid(); refreshStats(); renderCode();
-}
-
-function runRobot() {
-  if (base !== 4) { $('mode').value = '4'; setMode(); }
-  if (state !== 'idle') reset();
-  start();
-  let i = 0;
-  // ~1 code per second, like a person typing in order
-  robot = setInterval(() => {
-    if (state !== 'armed') return;
-    input = [3,2,1,0].map(p => (Math.floor(i / 4 ** p) % 4) + 1).join('');
-    renderCode(); submit(); i++;
-  }, 1000);
-}
-
-function setMode() {
-  base = Number($('mode').value);
-  $('modeLabel').textContent = base === 4 ? 'DÍGITOS 1-4' : 'DÍGITOS 0-9';
-  buildPad(); reset();
-}
-
-$('mode').onchange = setMode;
-$('start').onclick = start;
-$('robot').onclick = runRobot;
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') return press('OK');
-  if (e.key === 'Backspace') return press('DEL');
-  if (digits().includes(e.key)) press(e.key);
-});
-
-buildPad(); buildGrid(); refreshStats();
-</script>
+  <div class="sr" id="live" aria-live="assertive"></div>
+</div>
+<script src="assets/game.js"></script>
 </body>
 </html>
